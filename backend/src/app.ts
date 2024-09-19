@@ -4,7 +4,6 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import userRoutes from "./routes/user";
 import postRoutes from "./routes/post";
-import interactionRoutes from "./routes/interaction"
 
 
 dotenv.config();
@@ -13,7 +12,11 @@ dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({ extended: true }))
+app.use(cors({
+  origin:"*",
+  credentials:true
+}))
 const PORT = process.env.PORT ;
 
 
@@ -24,6 +27,5 @@ app.listen(PORT, () => {
 
 app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
-app.use("/api/interaction", interactionRoutes);
 
 export default app;

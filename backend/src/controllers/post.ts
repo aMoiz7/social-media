@@ -23,15 +23,25 @@ export const createPost = async (req: Request, res: Response) => {
   }
 };
 
+// Example backend controller modification for pagination
 export const getPosts = async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const offset = (page - 1) * limit;
+
   try {
     const [posts] = await connection.query(
-      "SELECT * FROM posts ORDER BY created_at DESC"
+      'SELECT posts.*, users.username, COUNT(likes.id) as likes_count FROM posts JOIN users ON posts.user_id = users.id LEFT JOIN likes ON posts.id = likes.post_id GROUP BY posts.id ORDER BY posts.created_at DESC LIMIT ? OFFSET ?',
+      [limit, offset]
     );
-    res.json(posts);
+
+    const [countResult] = await connection.query('SELECT COUNT(*) as count FROM posts');
+    //@ts-ignore
+    const total = countResult[0].count;
+
+    res.json({ posts, total });
   } catch (error:any) {
-    res
-      .status(500)
-      .json({ message: "Error retrieving posts", error: error.message });
+    res.status(500).json({ message: 'Error retrieving posts', error: error.message });
   }
 };
+
